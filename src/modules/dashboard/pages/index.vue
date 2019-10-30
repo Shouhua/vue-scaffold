@@ -1,7 +1,9 @@
 <template>
   <div>
     <h1>Dashboard</h1>
-    <div class="content">In the {{ name }} page</div>
+    <div class="content">
+      In the {{ name }} page
+    </div>
   </div>
 </template>
 <script>

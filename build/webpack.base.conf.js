@@ -2,6 +2,9 @@ const path = require('path');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
+const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
+const WebpackBar = require('webpackbar');
 
 module.exports = {
   mode: 'development',
@@ -23,8 +26,26 @@ module.exports = {
     }
   },
   devServer: {
-    hot: true
+    hot: true,
+    contentBase: path.resolve(__dirname, '../'), // since we use CopyWebpackPlugin.
+    publicPath: '/',
+    compress: false,
+    open: false,
+    // noInfo: true,
+    // overlay: true,
+    // quiet: true,
+    stats: {
+      colors: true,
+      hash: true,
+      timings: true,
+      assets: true,
+      chunks: false,
+      chunkModules: false,
+      modules: false,
+      children: false,
+    },
   },
+  devtool: 'cheap-module-eval-source-map',
   module: {
     noParse: /^(vue|vue-router|vuex|vuex-router-sync)$/,
     rules: [
@@ -154,6 +175,11 @@ module.exports = {
         BASE_URL: '/' // for BASE_URL variable on index.html
       },
     }),
+    new webpack.ProgressPlugin(),
+    new WebpackBar(),
+    new webpack.HotModuleReplacementPlugin(),
+    new FriendlyErrorsWebpackPlugin(),
+    new webpack.NoEmitOnErrorsPlugin(),
     new CopyWebpackPlugin([{
       from: path.resolve(__dirname, '../public'),
       to: '.',
