@@ -22,9 +22,32 @@ module.exports = {
       '@': path.resolve(__dirname, '../src')
     }
   },
+  devServer: {
+    hot: true
+  },
   module: {
     noParse: /^(vue|vue-router|vuex|vuex-router-sync)$/,
     rules: [
+      {
+        enforce: 'pre',
+        test: /\.(vue|(j|t)sx?)$/,
+        include: [path.resolve(__dirname, '../src')],
+        use: [
+          {
+            loader: 'eslint-loader',
+            options: {
+              extensions: [
+                '.js',
+                '.jsx',
+                '.vue'
+              ],
+              cache: true,
+              emitWarning: true,
+              emitError: true,
+            }
+          }
+        ]
+      },
       {
         test: /\.vue$/,
         use: [
@@ -128,7 +151,7 @@ module.exports = {
       template: path.resolve(__dirname, '../public/index.html'),
       inject: true,
       templateParameters: {
-        BASE_URL: '/'
+        BASE_URL: '/' // for BASE_URL variable on index.html
       },
     }),
     new CopyWebpackPlugin([{
