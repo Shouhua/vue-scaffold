@@ -7,19 +7,28 @@ const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const fs = require('fs');
+const camelCase = require('camelcase');
+const TerserPlugin = require('terser-webpack-plugin');
+
+const filesName = fs.readdirSync(path.join(__dirname, '../src/modules'));
+
+const entry = {};
+filesName.forEach((fileName) => {
+  if(fileName !== 'login' && fileName !== 'layout') {
+    entry[`${camelCase(fileName)}AsyncModule`] = `./src/modules/${fileName}/export.js`
+  }
+});
 
 module.exports = {
-  mode: 'development',
-  entry: {
-    app: [
-      './src/main.js'
-    ]
-  },
+  mode: 'production',
+  entry,
   output: {
     path: path.resolve(__dirname, '../dist'),
     filename: '[name].js',
+    chunkFilename: '[name].[chunkHash:5].js',
+    library: '[name]',
     publicPath: '/',
-    globalObject: 'this'
   },
   resolve: {
     extensions: ['.js', '.vue', '.json', '.svg'],
@@ -38,27 +47,7 @@ module.exports = {
     modules: false,
     children: false,
   },
-  devServer: {
-    hot: true,
-    contentBase: path.resolve(__dirname, '../'), // since we use CopyWebpackPlugin.
-    publicPath: '/',
-    compress: false,
-    open: false,
-    noInfo: true,
-    overlay: true,
-    quiet: true,
-    stats: {
-      colors: true,
-      hash: true,
-      timings: true,
-      assets: true,
-      chunks: false,
-      chunkModules: false,
-      modules: false,
-      children: false,
-    },
-  },
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'source-map',
   module: {
     noParse: /^(vue|vue-router|vuex|vuex-router-sync)$/,
     rules: [
@@ -162,37 +151,11 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              // you can specify a publicPath here
-              // by default it uses publicPath in webpackOptions.output
-              publicPath: '../',
-              hmr: process.env.NODE_ENV === 'development',
-            },
-          },
-          // 'vue-style-loader',
-          'css-loader',
-          'sass-loader'
-        ]
+        use: [ MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
       },
       {
         test: /\.css$/,
-        use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              // you can specify a publicPath here
-              // by default it uses publicPath in webpackOptions.output
-              // publicPath: '../',
-              hmr: process.env.NODE_ENV === 'development',
-            },
-          },
-          // 'vue-style-loader',
-          'css-loader',
-          'postcss-loader'
-        ]
+        use: [ MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader']
       },
     ]
   },
@@ -200,6 +163,51 @@ module.exports = {
     runtimeChunk: {
       name: 'manifest' // webpack runtime code
     },
+    minimize: true, // default true in production mode
+    minimizer : [
+      new TerserPlugin({
+        test: /\.js(\?.*)?$/i,
+        cache: true,
+        cacheKeys: defaultCacheKeys => defaultCacheKeys,
+        parallel: true,
+        sourceMap: true, // Must be set to true if using source-maps in production
+        extractComments: false,
+        terserOptions: {
+          output: {
+            comments: /^\**!|@preserve|@license|@cc_on/i
+          },
+          compress: {
+            arrows: false,
+            collapse_vars: false,
+            comparisons: false,
+            computed_props: false,
+            hoist_funs: false,
+            hoist_props: false,
+            hoist_vars: false,
+            inline: false,
+            loops: false,
+            negate_iife: false,
+            properties: false,
+            reduce_funcs: false,
+            reduce_vars: false,
+            switches: false,
+            toplevel: false,
+            typeofs: false,
+            booleans: true,
+            if_return: true,
+            sequences: true,
+            unused: true,
+            conditionals: true,
+            dead_code: true,
+            evaluate: true
+          },
+          // mangle: {
+          //   safari10: true
+          // }
+          // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+        }
+      }),
+    ],
     splitChunks: {
       // chunks: 'async',
       // chunks: 'all',
@@ -235,7 +243,6 @@ module.exports = {
         },
         common: {
           chunks: 'all',
-          automaticNameDelimiter: '-',
           minChunks: 2,
           minSize: 1000,
           // maxInitialRequests: 1,
@@ -268,9 +275,9 @@ module.exports = {
       },
     }),
     new webpack.ProgressPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
+    // new webpack.HotModuleReplacementPlugin(),
     new FriendlyErrorsWebpackPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
+    // new webpack.NoEmitOnErrorsPlugin(), // webpack 4 default config
     new CopyWebpackPlugin([{
       from: path.resolve(__dirname, '../public'),
       to: '.',
@@ -278,13 +285,12 @@ module.exports = {
         'index.html',
       ]
     }]),
-    new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // all options are optional
-      filename: '[name].css',
-      chunkFilename: '[id].css',
-      ignoreOrder: false, // Enable to remove warnings about conflicting order
-    }),
+    new MiniCssExtractPlugin(
+      {
+        filename: 'css/[name].[contenthash:8].css',
+        chunkFilename: 'css/[name].[contenthash:8].css'
+      }
+    ),
     new CleanWebpackPlugin(),
     new BundleAnalyzerPlugin(),
   ]

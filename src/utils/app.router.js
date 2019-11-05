@@ -3,7 +3,7 @@ import VueRouter from 'vue-router';
 
 Vue.use(VueRouter);
 
-var routes = [];
+const routes = [];
 const requireComponent = require.context('@/modules', true, /\.router.js$/);
 
 requireComponent.keys().forEach((fileName) => {

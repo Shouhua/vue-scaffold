@@ -23,7 +23,7 @@ export default {
      */
     toAbout() {
       this.$router.push({
-        path: '/about'      
+        name: 'about'
       }).catch((err) => {
         this.handleRouterError(err);
       });
@@ -33,7 +33,7 @@ export default {
      */
     toDashboard() {
       this.$router.push({
-        path: '/dashboard'      
+        name: 'dashboard'
       }).catch((err) => {
         this.handleRouterError(err);
       });
@@ -43,13 +43,12 @@ export default {
      * @param {Object} err error object
      */
     handleRouterError(err) {
-      if(err.name === 'NavigationDuplicated') {
-      } else {
+      if (err.name !== 'NavigationDuplicated') {
         console.log(err.message);
       }
     }
   }
-}
+};
 </script>
 <style lang="scss" scoped>
 .app {
