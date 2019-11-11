@@ -75,7 +75,7 @@ module.exports = {
                 '.jsx',
                 '.vue'
               ],
-              cache: true,
+              // cache: true,
               emitWarning: true,
               emitError: true,
             }
