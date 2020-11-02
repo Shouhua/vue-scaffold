@@ -1,4 +1,4 @@
-const component = (r) => require.ensure([], () => r(require('./pages/index')), 'dashboard');
+const component = (r) => require.ensure([], (require) => r(require('./pages/index')), 'dashboard');
 
 export default [
   {

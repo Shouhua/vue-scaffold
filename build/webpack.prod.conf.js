@@ -13,12 +13,17 @@ const TerserPlugin = require('terser-webpack-plugin');
 
 const filesName = fs.readdirSync(path.join(__dirname, '../src/modules'));
 
-const entry = {};
-filesName.forEach((fileName) => {
-  if(fileName !== 'login' && fileName !== 'layout') {
-    entry[`${camelCase(fileName)}AsyncModule`] = `./src/modules/${fileName}/export.js`
-  }
-});
+// const entry = {};
+// filesName.forEach((fileName) => {
+//   if(fileName !== 'login' && fileName !== 'layout') {
+//     entry[`${camelCase(fileName)}AsyncModule`] = `./src/modules/${fileName}/export.js`
+//   }
+// });
+const entry = {
+  app: [
+    './src/main.js'
+  ]
+}
 
 module.exports = {
   mode: 'production',
